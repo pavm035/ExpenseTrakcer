@@ -12,7 +12,8 @@ struct TransactionRow: View {
     let transaction: Transaction
     
     private var currency: String {
-        let currency = String.currency(from: transaction.currency!.intValue)!
+        let currency =
+        NumberFormatter.currency.string(from: transaction.currency!)!
         return transaction.transactionType == .expense ? ("- " + currency) : currency
     }
     

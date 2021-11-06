@@ -8,47 +8,53 @@
 import SwiftUI
 
 struct SummaryView: View {
-    let expenses: Int
-    let income: Int
+    let expenses: NSDecimalNumber
+    let income: NSDecimalNumber
     
-    private var balance: Int {
-        return income - expenses
+    private var balance: NSDecimalNumber {
+        return income.subtracting(expenses)
+    }
+    
+    private var progressVal: Double {
+        guard !income.decimalValue.isZero else {
+            return 0
+        }
+        
+        return expenses.dividing(by: income).doubleValue
+    }
+    
+    private func summaryView(title: String, amount: NSDecimalNumber) -> some View {
+        VStack(spacing: 8) {
+            Text(title)
+                .fontWeight(.semibold)
+                .layoutPriority(2)
+            Text(amount, formatter: NumberFormatter.currency)
+        }
+        .lineLimit(1)
+        .frame(maxWidth: .infinity)
     }
     
     var body: some View {
         VStack(spacing: 30) {
             HStack(spacing: 15) {
-                VStack(spacing: 8) {
-                    Text("Expenses")
-                        .fontWeight(.semibold)
-                    Text(String.currency(from: expenses)!)
-                }
+                summaryView(title: "Expenses", amount: expenses)
                 
                 Divider()
-                    .frame(height: 50)
                 
-                VStack(spacing: 8) {
-                    Text("Income")
-                        .fontWeight(.semibold)
-                    Text(String.currency(from: income)!)
-                }
-                .foregroundColor(.green)
+                summaryView(title: "Income", amount: income)
+                    .foregroundColor(.green)
                 
                 Divider()
-                    .frame(height: 50)
                 
-                VStack(spacing: 8) {
-                    Text("Balance")
-                        .fontWeight(.semibold)
-                    Text(String.currency(from: balance)!)
-                }
-                .foregroundColor(balance < 0 ? .red : .black)
+                summaryView(title: "Balance", amount: balance)
+                    .foregroundColor(balance.intValue < 0 ? .red : .blue)
             }
-                        
-            CustomProgressView(value: 0.5)
+            .frame(maxWidth: .infinity)
+            
+            CustomProgressView(value: progressVal)
                 .frame(height: 10)
         }
-        .padding()
+        .padding(.vertical)
     }
 }
 

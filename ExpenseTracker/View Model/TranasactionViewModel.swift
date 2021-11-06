@@ -14,9 +14,11 @@ class TranasactionViewModel: NSObject, ObservableObject {
     let persistence: PersistenceController
     private var fetchController: NSFetchedResultsController<Transaction>
     @Published private(set) var transactionsInfo: [TransactionInfo] = []
-    @Published private(set) var totalExpenses: Int =  0
-    @Published private(set) var totalIncome: Int =  0
-
+    @Published private(set) var transactionsInfo1: [(Int, Int)] = []
+    @Published private(set) var totalExpenses: NSDecimalNumber =  0
+    @Published private(set) var totalIncome: NSDecimalNumber =  0
+    @Published var showNewTransaction = false
+    
     
     init(persistence: PersistenceController) {
         self.persistence = persistence
@@ -29,7 +31,7 @@ class TranasactionViewModel: NSObject, ObservableObject {
         super.init()
         fetchController.delegate = self
     }
-        
+    
     func load() {
         do {
             try fetchController.performFetch()
@@ -37,6 +39,11 @@ class TranasactionViewModel: NSObject, ObservableObject {
         } catch {
             debugPrint("failed to fetch items!", error)
         }
+    }
+    
+    func deleteItems(at offsets: IndexSet, info: TransactionInfo) {
+        persistence.delete(objects: offsets.map { info.transactions[$0] })
+        debugPrint("deleted items")
     }
     
     private func updateFetchedInfo() {
@@ -47,15 +54,18 @@ class TranasactionViewModel: NSObject, ObservableObject {
             return (sectionInfo.name, transactions)
         } ?? []
         
-        fetchController.fetchedObjects?.forEach({ [weak self] transaction in
-            guard let self = self else { return }
-            
+        var income = 0
+        var expenses = 0
+        fetchController.fetchedObjects?.forEach { transaction in
             if transaction.transactionType == .income {
-                self.totalIncome += transaction.currency?.intValue ?? 0
+                income += transaction.currency?.intValue ?? 0
             } else {
-                self.totalExpenses += transaction.currency?.intValue ?? 0
+                expenses += transaction.currency?.intValue ?? 0
             }
-        })
+        }
+        
+        totalIncome = NSDecimalNumber(value: income)
+        totalExpenses = NSDecimalNumber(value: expenses)
     }
 }
 

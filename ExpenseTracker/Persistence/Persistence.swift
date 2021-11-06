@@ -75,7 +75,18 @@ struct PersistenceController {
                 try context.save()
             } catch {
                 // Show some error here
+                debugPrint("saving error", error)
             }
         }
+    }
+    
+    func delete(objects: [NSManagedObject]) {
+        let context = container.viewContext
+        
+        objects.forEach { object in
+            context.delete(object)
+        }
+        
+        save()
     }
 }

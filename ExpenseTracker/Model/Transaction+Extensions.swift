@@ -7,9 +7,18 @@
 
 import Foundation
 
-enum TransactionType: Int32 {
-case expense
-case income
+enum TransactionType: Int32, CaseIterable {
+    case expense
+    case income
+    
+    var displayString: String {
+        switch self {
+        case .expense:
+            return "Expense"
+        case .income:
+            return "Income"
+        }
+    }
 }
 
 // MARK: - Transaction + Extension
