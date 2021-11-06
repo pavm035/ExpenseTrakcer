@@ -2,7 +2,7 @@
 //  Persistence.swift
 //  ExpenseTracker
 //
-//  Created by Mahadevaiah, Pavan | Pavan | ECMPD on 2021/11/06.
+
 //
 
 import CoreData
@@ -13,12 +13,16 @@ struct PersistenceController {
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
+        for i in 0..<10 {
+            let newItem = Transaction(context: viewContext)            
+            newItem.name = "Transaction \(i)"
+            newItem.type = (0...1).randomElement()!
+            newItem.currency = NSDecimalNumber(value: 700 + i)
             newItem.timestamp = Date()
         }
         do {
             try viewContext.save()
+            debugPrint("saved preview transactions...")
         } catch {
             // Replace this implementation with code to handle the error appropriately.
             // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
@@ -51,5 +55,27 @@ struct PersistenceController {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         })
+    }
+    
+    func fetch<T>(request: NSFetchRequest<T>) -> [T] {
+        do {
+            return try container.viewContext.fetch(request)
+        }
+        catch {
+            debugPrint("fetch error", error)
+            fatalError()
+        }
+    }
+    
+    func save() {
+        let context = container.viewContext
+
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                // Show some error here
+            }
+        }
     }
 }
